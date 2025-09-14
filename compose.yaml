@@ -1,0 +1,9 @@
+services:
+  seq:
+    image: datalust/seq:latest
+    environment:
+        ACCEPT_EULA: "Y"
+        SEQ_PASSWORD: "123"
+    ports:
+        - "5341:5341"
+        - "81:80"
