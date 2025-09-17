@@ -7,34 +7,28 @@ namespace BookStoreApp.API.Models
     {
         public static Data.Author MapToAuthor(this AuthorCreateDto authorDto)
         {
-            var author = new Data.Author()
+            return new Data.Author()
             {
                 FirstName = authorDto.FirstName,
                 LastName = authorDto.LastName,
                 Bio = authorDto.Bio,
             };
-
-            return author;
-
         }
 
         public static Data.Author MapToAuthor(this AuthorUpdateDto authorUpdateDto)
         {
-            var author = new Data.Author()
+            return new Data.Author
             {
                 Id = authorUpdateDto.Id,
                 FirstName = authorUpdateDto.FirstName,
                 LastName = authorUpdateDto.LastName,
                 Bio = authorUpdateDto.Bio,
             };
-
-            return author;
-
         }
 
         public static AuthorReadOnlyDto MapToAuthorReadOnlyDto(this Data.Author author)
         {
-            var authorReadOnlyDto = new AuthorReadOnlyDto
+            return new AuthorReadOnlyDto
             {
                 Id = author.Id,
                 FirstName = author.FirstName,
@@ -42,13 +36,11 @@ namespace BookStoreApp.API.Models
                 Bio = author.Bio,
             };
 
-            return authorReadOnlyDto;
-
         }
 
-        public static BookDto MapToBookDto(this Data.Book book)
+        public static BookReadOnlyDto MapToBookReadOnlyDto(this Data.Book book)
         {
-            var bookDto = new BookDto
+            return new BookReadOnlyDto
             {
                 Id = book.Id,
                 Image = book.Image,
@@ -57,12 +49,38 @@ namespace BookStoreApp.API.Models
                 Summary = book.Summary,
                 Title = book.Title,
                 Year = book.Year,
+                AuthorId = (int)book.AuthorId,
+                AuthorName = $"{book.Author.FirstName} {book.Author.LastName}"
             };
-
-            return bookDto;
         }
 
+        public static Data.Book MapToBook(this BookCreateDto createBookDto)
+        {
+            return new Data.Book
+            {
+                AuthorId = createBookDto.AuthorId,
+                Image = createBookDto.Image,
+                Isbn = createBookDto.Isbn,
+                Price = createBookDto.Price,
+                Summary = createBookDto.Summary,
+                Title = createBookDto.Title,
+                Year = createBookDto.Year,
+            };
+        }
 
-
+        public static Data.Book MapToBook(this BookUpdateDto updateBookDto)
+        {
+            return new Data.Book
+            {
+                AuthorId = updateBookDto.AuthorId,
+                Image = updateBookDto.Image,
+                Id = updateBookDto.Id,
+                Isbn = updateBookDto.Isbn,
+                Price = updateBookDto.Price,
+                Summary = updateBookDto.Summary,
+                Title = updateBookDto.Title,
+                Year = updateBookDto.Year
+            };
+        }
     }
 }

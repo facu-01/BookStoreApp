@@ -40,7 +40,7 @@ namespace BookStoreApp.API.Controllers
         }
 
         [HttpGet("{id}/books")]
-        public async Task<ActionResult<IEnumerable<BookDto>>> GetAuthorBooks(int id)
+        public async Task<ActionResult<IEnumerable<BookReadOnlyDto>>> GetAuthorBooks(int id)
         {
             var author = await _context.Authors.FindAsync(id);
 
@@ -49,7 +49,7 @@ namespace BookStoreApp.API.Controllers
                 return NotFound();
             }
 
-            return author.Books.Select(b => b.MapToBookDto()).ToList();
+            return author.Books.Select(b => b.MapToBookReadOnlyDto()).ToList();
         }
 
         // PUT: api/Authors/5
@@ -88,7 +88,7 @@ namespace BookStoreApp.API.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<AuthorCreateDto>> PostAuthor(AuthorCreateDto authorDto)
+        public async Task<ActionResult<AuthorReadOnlyDto>> PostAuthor(AuthorCreateDto authorDto)
         {
             var author = authorDto.MapToAuthor();
             _context.Authors.Add(author);
