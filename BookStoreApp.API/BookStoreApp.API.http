@@ -12,8 +12,18 @@ GET {{BookStoreApp.API_HostAddress}}/api/authors
 POST {{BookStoreApp.API_HostAddress}}/api/authors
 Content-Type: application/json
 
+{}
+###
+
+# @name login
+POST {{BookStoreApp.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
 {
-  //Author
+    "userName": "facu",
+    "password": "Indio.123"
 }
 
-###
+### get books
+GET {{BookStoreApp.API_HostAddress}}/api/books
+Authorization: Bearer {{login.response.body.$.token}}
