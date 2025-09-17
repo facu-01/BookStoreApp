@@ -1,6 +1,19 @@
-@BookStoreApp.API_HostAddress = http://localhost:5258
+@BookStoreApp.API_HostAddress = https://localhost:7264
 
 GET {{BookStoreApp.API_HostAddress}}/weatherforecast/
 Accept: application/json
+
+###
+
+GET {{BookStoreApp.API_HostAddress}}/api/authors
+
+###
+
+POST {{BookStoreApp.API_HostAddress}}/api/authors
+Content-Type: application/json
+
+{
+  //Author
+}
 
 ###
