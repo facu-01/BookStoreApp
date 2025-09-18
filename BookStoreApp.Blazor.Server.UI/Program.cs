@@ -7,13 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var app = builder.Build();
-
 
 // http clients
 builder.Services.AddHttpClient<IClient, Client>(
     cli => cli.BaseAddress = new Uri(builder.Configuration["BookStoreApiUrl"])
 );
+
+
+var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
