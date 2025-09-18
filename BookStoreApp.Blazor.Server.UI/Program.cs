@@ -1,4 +1,5 @@
 using BookStoreApp.Blazor.Server.UI.Components;
+using BookStoreApp.Blazor.Server.UI.Services.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,13 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();
+
+
+// http clients
+builder.Services.AddHttpClient<IClient, Client>(
+    cli => cli.BaseAddress = new Uri(builder.Configuration["BookStoreApiUrl"])
+);
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
