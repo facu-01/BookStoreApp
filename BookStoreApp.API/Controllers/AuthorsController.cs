@@ -23,6 +23,7 @@ namespace BookStoreApp.API.Controllers
 
         // GET: api/Authors
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<AuthorReadOnlyDto>>> GetAuthors()
         {
             return await _context.Authors.Select(e => e.MapToAuthorReadOnlyDto()).ToListAsync();
@@ -30,6 +31,7 @@ namespace BookStoreApp.API.Controllers
 
         // GET: api/Authors/5
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<AuthorReadOnlyDto>> GetAuthor(int id)
         {
             var author = await _context.Authors.FindAsync(id);
@@ -43,6 +45,7 @@ namespace BookStoreApp.API.Controllers
         }
 
         [HttpGet("{id}/books")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<BookReadOnlyDto>>> GetAuthorBooks(int id)
         {
             var author = await _context.Authors.FindAsync(id);
@@ -59,6 +62,9 @@ namespace BookStoreApp.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = UserRoles.Admin)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PutAuthor(int id, AuthorUpdateDto authorUpdateDto)
         {
             if (id != authorUpdateDto.Id)
@@ -93,6 +99,8 @@ namespace BookStoreApp.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = UserRoles.Admin)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthorReadOnlyDto>> PostAuthor(AuthorCreateDto authorDto)
         {
             var author = authorDto.MapToAuthor();
@@ -105,6 +113,8 @@ namespace BookStoreApp.API.Controllers
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
         [Authorize(Roles = UserRoles.Admin)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
             var author = await _context.Authors.FindAsync(id);

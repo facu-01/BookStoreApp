@@ -28,6 +28,8 @@ namespace BookStoreApp.API.Controllers
 
         [HttpPost]
         [Route("register")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(UserRegisterDto userDto)
         {
 
@@ -61,6 +63,8 @@ namespace BookStoreApp.API.Controllers
 
         [HttpPost]
         [Route("login")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<UserAuthenticatedDto>> Login(UserLoginDto loginUserDto)
         {
 
