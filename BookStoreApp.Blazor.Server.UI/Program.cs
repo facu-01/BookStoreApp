@@ -1,17 +1,23 @@
 using BookStoreApp.Blazor.Server.UI.Components;
+using BookStoreApp.Blazor.Server.UI.Providers;
+using BookStoreApp.Blazor.Server.UI.Services.Authentication;
 using BookStoreApp.Blazor.Server.UI.Services.Http;
+using BookStoreApp.Blazor.Server.UI.Services.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
-
-// http clients
 builder.Services.AddHttpClient<IClient, Client>(
     cli => cli.BaseAddress = new Uri(builder.Configuration["BookStoreApiUrl"])
 );
+builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 
 var app = builder.Build();

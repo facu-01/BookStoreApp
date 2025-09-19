@@ -1,19 +1,28 @@
 ﻿<nav>
-    <div>
-        <NavLink href="" Match="NavLinkMatch.All">
-            <span aria-hidden="true"></span> Home
-        </NavLink>
-    </div>
+  
+    <AuthorizeView>
+        <Authorized>
+            <span>
+                Hello @context.User?.Identity?.Name
+            </span>
+            <NavLink href="users/logout">
+                <span aria-hidden="true"></span> Logout
+            </NavLink>
+        </Authorized>
 
-    <div>
-        <NavLink href="counter">
-            <span aria-hidden="true"></span> Counter
-        </NavLink>
-    </div>
+        <NotAuthorized>
+            <NavLink href="users/register">
+                <span aria-hidden="true"></span> Register
+            </NavLink>
 
-    <div>
-        <NavLink href="weather">
-            <span aria-hidden="true"></span> Weather
-        </NavLink>
-    </div>
+            <NavLink href="users/login">
+                <span aria-hidden="true"></span> Login
+            </NavLink>
+        </NotAuthorized>
+    </AuthorizeView>
+
+    <NavLink href="" Match="NavLinkMatch.All">
+        <span aria-hidden="true"></span> Home
+    </NavLink>
+   
 </nav>

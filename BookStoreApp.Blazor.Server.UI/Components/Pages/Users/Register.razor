@@ -1,0 +1,88 @@
+﻿@page "/users/register"
+@rendermode InteractiveServer
+@inject IClient _httpClient
+@inject NavigationManager _navManager
+
+
+<h3>Register New Account</h3>
+
+@if(string.IsNullOrEmpty(message) == false)
+{
+	<article class="pico-color-red-500">@message</article>
+}
+
+<div>
+	<EditForm FormName="Register" Model="RegistrationModel" OnValidSubmit="HandleRegistration">
+		<DataAnnotationsValidator/>
+		<ValidationSummary/>
+		
+		<fieldset>
+			<label>
+				First Name
+				<InputText @bind-Value="RegistrationModel.FirstName" />
+				<ValidationMessage For="@(() => RegistrationModel.FirstName)" />
+			</label>
+		</fieldset>
+
+		<fieldset>
+			<label>
+				Last Name
+				<InputText @bind-Value="RegistrationModel.LastName" />
+				<ValidationMessage For="@(() => RegistrationModel.LastName)" />
+			</label>
+		</fieldset>
+
+		<fieldset>
+			<label>
+				Username
+				<InputText @bind-Value="RegistrationModel.UserName" />
+				<ValidationMessage For="@(() => RegistrationModel.UserName)" />
+			</label>
+		</fieldset>
+
+		<fieldset>
+			<label>
+				Email
+				<InputText @bind-Value="RegistrationModel.Email" />
+				<ValidationMessage For="@(() => RegistrationModel.Email)" />
+			</label>
+		</fieldset>
+
+		<fieldset>
+			<label>
+				Password
+				<InputText type="password" @bind-Value="RegistrationModel.Password" />
+				<ValidationMessage For="@(() => RegistrationModel.Password)" />
+			</label>
+		</fieldset>
+		
+		<button type="submit">Register</button>
+	</EditForm>
+</div>
+
+@code {
+
+	private UserRegisterDto RegistrationModel = new UserRegisterDto();
+
+	private string message = string.Empty;
+
+	private async Task HandleRegistration()
+	{
+
+		try
+		{
+			await _httpClient.RegisterAsync(RegistrationModel);
+			_navManager.NavigateTo("users/login");
+
+		}catch(ApiException ex)
+		{
+			message = ex.Message;
+
+		}catch(Exception ex)
+		{
+			message = ex.Message;
+		}
+
+	}
+
+}
