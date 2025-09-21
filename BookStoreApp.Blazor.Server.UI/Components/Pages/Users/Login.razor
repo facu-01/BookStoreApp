@@ -31,7 +31,7 @@
 			</label>
 		</fieldset>
 
-		<button type="submit">Login</button>
+		<button aria-busy="@(loading ? "true" : "false")" disabled="@loading" type="submit">Login</button>
 	</EditForm>
 </div>
 
@@ -41,11 +41,14 @@
 
 	private string message = string.Empty;
 
+	private bool loading = false;
+
 	private async Task HandleLogin()
 	{
-
+		loading = true;
 		try
 		{
+
 			var response = await _authenticationService.AuthenticateAsync(LoginModel);
 
 			if (response)
@@ -62,6 +65,10 @@
 		catch (Exception ex)
 		{
 			message = ex.Message;
+		}
+		finally
+		{
+			loading = false;
 		}
 
 	}
