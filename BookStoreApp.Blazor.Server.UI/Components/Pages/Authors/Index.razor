@@ -1,0 +1,47 @@
+﻿@page "/authors"
+@rendermode InteractiveServer
+@inject IBaseHttpClient _baseHttpClient
+
+
+@* TODO: revisar auth del ruteo? *@
+
+<h1>Authors</h1>
+<a href="authors/create">Create</a>
+<br />
+
+@if(response == null)
+{
+	<span aria-busy="true">Loading ...</span>
+}
+else
+{
+	@if (response.Success == false)
+	{
+		<article class="pico-color-red-500">@response.Message</article>
+	}
+	else
+	{
+		<QuickGrid Items="response.Data">
+			<PropertyColumn Property="@(a => a.Id)" Sortable="true" />
+			<PropertyColumn Property="@(a => a.FirstName)" Sortable="true" />
+			<PropertyColumn Property="@(a => a.LastName)" Sortable="true" />
+			<TemplateColumn Context="author">
+				<a href="@($"movies/edit/{author.Id}")">Edit</a> |
+				<a href="@($"movies/details/{author.Id}")">Details</a> |
+				<a href="@($"movies/delete/{author.Id}")">Delete</a>
+			</TemplateColumn>
+		</QuickGrid>
+	}
+
+}
+
+@code {
+
+	private Response<IQueryable<AuthorReadOnlyDto>>? response = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		response = await _baseHttpClient.MakeRequest((
+			async cli => (await cli.AuthorsAllAsync()).AsQueryable()));
+	}
+}

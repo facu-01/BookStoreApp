@@ -1,15 +1,6 @@
 ﻿<nav>
   
     <AuthorizeView>
-        <Authorized>
-            <span>
-                Hello @context.User?.Identity?.Name
-            </span>
-            <NavLink href="users/logout">
-                <span aria-hidden="true"></span> Logout
-            </NavLink>
-        </Authorized>
-
         <NotAuthorized>
             <NavLink href="users/register">
                 <span aria-hidden="true"></span> Register
@@ -19,6 +10,17 @@
                 <span aria-hidden="true"></span> Login
             </NavLink>
         </NotAuthorized>
+        <Authorized>
+            <span>
+                Hello @context.User?.Identity?.Name
+            </span>
+            <NavLink href="users/logout">
+                <span aria-hidden="true"></span> Logout
+            </NavLink>
+            <NavLink href="authors">
+                <span aria-hidden="true"></span> Authors
+            </NavLink>
+        </Authorized>
     </AuthorizeView>
 
     <NavLink href="" Match="NavLinkMatch.All">
