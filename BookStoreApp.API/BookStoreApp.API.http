@@ -27,3 +27,8 @@ Content-Type: application/json
 ### get books
 GET {{BookStoreApp.API_HostAddress}}/api/books
 Authorization: Bearer {{login.response.body.$.token}}
+
+
+### get books of author
+GET {{BookStoreApp.API_HostAddress}}/api/authors/2/books
+Authorization: Bearer {{login.response.body.$.token}}
