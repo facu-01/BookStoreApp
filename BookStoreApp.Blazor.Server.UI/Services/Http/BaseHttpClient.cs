@@ -33,7 +33,34 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
             catch (ApiException ex)
             {
 
-                return ConvertApiException<T>(ex);
+                var response = ConvertApiException(ex);
+                return new Response<T>
+                {
+                    Message = response.Message,
+                    Success = response.Success,
+                    ValidationErrors = response.ValidationErrors,
+                };
+
+            }
+        }
+
+        public async Task<Response> MakeRequest(Func<IClient, Task> request)
+        {
+            try
+            {
+                await SetBearerToken();
+
+                await request(this);
+
+                return new Response
+                {
+                    Success = true,
+                };
+            }
+            catch (ApiException ex)
+            {
+
+                return ConvertApiException(ex);
 
             }
         }
@@ -49,29 +76,31 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
         }
 
 
-        private static Response<T> ConvertApiException<T>(ApiException ex) => ex.StatusCode switch
+        private static Response ConvertApiException(ApiException ex) => ex.StatusCode switch
         {
-            (int)HttpStatusCode.BadRequest => new Response<T>
+            (int)HttpStatusCode.BadRequest => new Response
             {
                 Message = "Validation errors have ocurred.",
                 Success = false,
                 ValidationErrors = ex.Response
             },
-            (int)HttpStatusCode.NotFound => new Response<T>
+            (int)HttpStatusCode.NotFound => new Response
             {
                 Message = "The request resource doesnt exists.",
                 Success = false,
             },
-            (int)HttpStatusCode.Forbidden => new Response<T>
+            (int)HttpStatusCode.Forbidden => new Response
             {
                 Message = "You dont have permission to do that.",
                 Success = false,
             },
-            _ => new Response<T>
+            _ => new Response
             {
                 Message = "Something went wrong, please try again.",
                 Success = false,
             },
         };
+
+
     }
 }

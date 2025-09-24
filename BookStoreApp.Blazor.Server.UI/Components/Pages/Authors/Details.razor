@@ -1,0 +1,98 @@
+﻿@page "/authors/details/{Id:int}"
+@inject IBaseHttpClient _baseHttpClient
+
+<h1>Details</h1>
+
+
+@if (AuthorResponse == null)
+{
+	<span aria-busy="true">Loading ...</span>
+}
+else if (AuthorResponse.Success == false)
+{
+	<article class="pico-color-red-500">@AuthorResponse.Message</article>
+}else
+{
+	<EditForm FormName="AuthorEdit" Model="AuthorResponse.Data">
+		<fieldset disabled>
+			<fieldset>
+				<label>
+					First name
+					<InputText @bind-Value="AuthorResponse.Data.FirstName" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Last name
+					<InputText @bind-Value="AuthorResponse.Data.LastName" />
+				</label>
+			</fieldset>
+			<fieldset>
+				<label>
+					Biography
+					<InputText @bind-Value="AuthorResponse.Data.Bio" />
+				</label>
+			</fieldset>
+
+		</fieldset>
+	</EditForm>
+
+	<div class="grid">
+		<a href="authors" class="secondary">
+			Go back to list
+		</a>
+		<a href="authors/edit/@Id" class="contrast">
+			Edit Auhor
+		</a>
+	</div>
+
+	<h2> Books </h2>
+
+	@if (AuthorBooksResponse == null)
+	{
+		<span aria-busy="true">Loading ...</span>
+	}
+	else if (AuthorBooksResponse.Success == false)
+	{
+		<article class="pico-color-red-500">@AuthorBooksResponse.Message</article>
+	} else if(AuthorBooksResponse.Data?.Any() == false)
+	{
+		<article class="pico-color-amber-150">There is no books for this author</article>
+	}
+	else
+	{
+		<QuickGrid Items="AuthorBooksResponse.Data">
+			<PropertyColumn Property="@(b => b.Id)" Sortable="true" />
+			<PropertyColumn Property="@(b => b.Year)" Sortable="true" />
+			<PropertyColumn Property="@(b => b.Title)" Sortable="true" />
+			<PropertyColumn Property="@(b => b.Price.HasValue ? b.Price.Value.ToString("C") : string.Empty)" Sortable="true" />
+			<PropertyColumn Property="@(b => b.Isbn)" Sortable="true" />
+			<TemplateColumn Context="book">
+				<a href="book/details/@book.Id">View Book</a>
+			</TemplateColumn>
+		</QuickGrid>
+	}
+
+}
+
+
+@code {
+
+	[Parameter]
+	public int Id { get; set; }
+
+	private Response<AuthorReadOnlyDto>? AuthorResponse = null;
+
+	private Response<IQueryable<BookReadOnlyDto>>? AuthorBooksResponse = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		AuthorResponse = await _baseHttpClient.MakeRequest((
+			cli => cli.AuthorsGETAsync(Id)));
+
+		AuthorBooksResponse = await _baseHttpClient.MakeRequest((
+			async cli => (await cli.BooksAsync(Id)).AsQueryable()));
+	}
+
+}

@@ -3,8 +3,6 @@
 @inject IBaseHttpClient _baseHttpClient
 
 
-@* TODO: revisar auth del ruteo? *@
-
 <h1>Authors</h1>
 <a href="authors/create">Create</a>
 <br />
@@ -26,22 +24,63 @@ else
 			<PropertyColumn Property="@(a => a.FirstName)" Sortable="true" />
 			<PropertyColumn Property="@(a => a.LastName)" Sortable="true" />
 			<TemplateColumn Context="author">
-				<a href="@($"movies/edit/{author.Id}")">Edit</a> |
-				<a href="@($"movies/details/{author.Id}")">Details</a> |
-				<a href="@($"movies/delete/{author.Id}")">Delete</a>
+				<a href="authors/edit/@author.Id">Edit</a> |
+				<a href="authors/details/@author.Id">Details</a> |
+				<button class="outline" @onclick=@(() => SetDeleteDialog(author))>Delete</button>
 			</TemplateColumn>
 		</QuickGrid>
 	}
-
 }
+
+@if(deleteAuthor != null)
+{
+	<dialog open>
+		<article>
+			<h2>Confirm delete Author @deleteAuthor?.FirstName @deleteAuthor?.LastName </h2>
+			<footer>
+				<button class="secondary" @onclick=@(() => SetDeleteDialog(null))>
+					Cancel
+				</button>
+				<button @onclick=@(() => DeleteAuthor(deleteAuthor.Id))>Confirm</button>
+			</footer>
+		</article>
+	</dialog>
+}
+
 
 @code {
 
 	private Response<IQueryable<AuthorReadOnlyDto>>? response = null;
+	private AuthorReadOnlyDto? deleteAuthor = null; // acts as a flag to show/hide the dialog
+
 
 	protected override async Task OnInitializedAsync()
 	{
 		response = await _baseHttpClient.MakeRequest((
 			async cli => (await cli.AuthorsAllAsync()).AsQueryable()));
+	}
+
+
+	private void SetDeleteDialog(AuthorReadOnlyDto? author)
+	{
+		deleteAuthor = author;
+	}
+
+
+	private async Task DeleteAuthor(int id)
+	{
+		var deleteResponse = await _baseHttpClient.MakeRequest(cli => cli.AuthorsDELETEAsync(id));
+		if (deleteResponse.Success)
+		{
+			// Refresh the list of authors after deletion
+			await OnInitializedAsync();
+		}
+		else
+		{
+			// TODO: Handle error (e.g., show a message to the user)
+		}
+
+		deleteAuthor = null;
+
 	}
 }

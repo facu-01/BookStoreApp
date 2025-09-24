@@ -1,6 +1,7 @@
 ﻿namespace BookStoreApp.Blazor.Server.UI.Services.Http
 {
-    public class Response<T>
+
+    public class Response
     {
         public string Message { get; set; }
 
@@ -8,6 +9,12 @@
 
         public bool Success { get; set; }
 
-        public T Data { get; set; }
     }
+
+    public class Response<T> : Response
+    {
+        public T? Data { get; set; }
+    }
+
+
 }
