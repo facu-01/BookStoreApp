@@ -1,4 +1,4 @@
-﻿namespace BookStoreApp.API.Static
+﻿namespace BookStoreApp.Commons
 {
     public static class UserRoles
     {

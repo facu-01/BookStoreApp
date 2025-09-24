@@ -3,8 +3,13 @@
 @inject IBaseHttpClient _baseHttpClient
 
 
+
+
 <h1>Authors</h1>
-<a href="authors/create">Create</a>
+
+<AuthorizeView Roles="@UserRoles.Admin">
+	<a href="authors/create">Create</a>
+</AuthorizeView>
 <br />
 
 @if(response == null)
@@ -24,9 +29,11 @@ else
 			<PropertyColumn Property="@(a => a.FirstName)" Sortable="true" />
 			<PropertyColumn Property="@(a => a.LastName)" Sortable="true" />
 			<TemplateColumn Context="author">
-				<a href="authors/edit/@author.Id">Edit</a> |
-				<a href="authors/details/@author.Id">Details</a> |
-				<button class="outline" @onclick=@(() => SetDeleteDialog(author))>Delete</button>
+				<a href="authors/details/@author.Id">Details</a> 
+				<AuthorizeView Roles="@UserRoles.Admin">
+					| <a href="authors/edit/@author.Id">Edit</a> |
+					<button class="outline" @onclick=@(() => SetDeleteDialog(author))>Delete</button>
+				</AuthorizeView>
 			</TemplateColumn>
 		</QuickGrid>
 	}

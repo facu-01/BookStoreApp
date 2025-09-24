@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject IBaseHttpClient _baseHttpClient
 @inject NavigationManager _navManager
+@attribute [Authorize(Roles = UserRoles.Admin)]
 
 <h1>Create Author</h1>
 

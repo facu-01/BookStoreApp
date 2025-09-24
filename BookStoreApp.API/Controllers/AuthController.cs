@@ -4,6 +4,7 @@ using System.Text;
 using BookStoreApp.API.Data;
 using BookStoreApp.API.Models.User;
 using BookStoreApp.API.Static;
+using BookStoreApp.Commons;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;

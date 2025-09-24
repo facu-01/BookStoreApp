@@ -1,7 +1,7 @@
 ﻿using BookStoreApp.API.Data;
 using BookStoreApp.API.Models;
 using BookStoreApp.API.Models.Book;
-using BookStoreApp.API.Static;
+using BookStoreApp.Commons;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
