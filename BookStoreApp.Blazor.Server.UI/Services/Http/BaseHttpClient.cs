@@ -3,6 +3,7 @@
 
 using System.Net;
 using System.Net.Http.Headers;
+using BookStoreApp.Blazor.Server.UI.Services.Authentication;
 using BookStoreApp.Blazor.Server.UI.Services.LocalStorage;
 
 namespace BookStoreApp.Blazor.Server.UI.Services.Http
@@ -10,10 +11,12 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
     public class BaseHttpClient : Client, IBaseHttpClient
     {
         private readonly ILocalStorageService _localStorageService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public BaseHttpClient(HttpClient httpClient, ILocalStorageService localStorageService) : base(httpClient)
+        public BaseHttpClient(HttpClient httpClient, ILocalStorageService localStorageService, IAuthenticationService authenticationService) : base(httpClient)
         {
             _localStorageService = localStorageService;
+            _authenticationService = authenticationService;
         }
 
         public async Task<Response<T>> MakeRequest<T>(Func<IClient, Task<T>> request)
@@ -34,6 +37,12 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
             {
 
                 var response = ConvertApiException(ex);
+
+                if (ex.StatusCode == ((int)HttpStatusCode.Unauthorized))
+                {
+                    await _authenticationService.Logout();
+                }
+
                 return new Response<T>
                 {
                     Message = response.Message,
@@ -59,6 +68,10 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
             }
             catch (ApiException ex)
             {
+                if (ex.StatusCode == ((int)HttpStatusCode.Unauthorized))
+                {
+                    await _authenticationService.Logout();
+                }
 
                 return ConvertApiException(ex);
 

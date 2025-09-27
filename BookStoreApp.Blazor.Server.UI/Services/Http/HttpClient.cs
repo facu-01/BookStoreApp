@@ -126,12 +126,12 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<BookReadOnlyDto> BooksGETAsync(int id, System.Threading.CancellationToken cancellationToken);
 
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task BooksPUTAsync(int id, BookUpdateDto body);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task BooksPUTAsync(int id, BookUpdateDto body, System.Threading.CancellationToken cancellationToken);
 
@@ -1169,7 +1169,7 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
             }
         }
 
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual System.Threading.Tasks.Task BooksPUTAsync(int id, BookUpdateDto body)
         {
@@ -1177,7 +1177,7 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task BooksPUTAsync(int id, BookUpdateDto body, System.Threading.CancellationToken cancellationToken)
         {
@@ -1228,7 +1228,7 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
                         ProcessResponse(client_, response_);
 
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 204)
                         {
                             return;
                         }
@@ -1664,7 +1664,7 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
 
         [System.Text.Json.Serialization.JsonPropertyName("year")]
         [System.ComponentModel.DataAnnotations.Range(1800, 2147483647)]
-        public int? Year { get; set; }
+        public int Year { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("isbn")]
         [System.ComponentModel.DataAnnotations.StringLength(50)]
@@ -1674,13 +1674,17 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
         [System.ComponentModel.DataAnnotations.StringLength(250)]
         public string Summary { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("image")]
-        [System.ComponentModel.DataAnnotations.StringLength(50)]
-        public string Image { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("imageBase64")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ImageBase64 { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("imageOringinalName")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ImageOringinalName { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("price")]
         [System.ComponentModel.DataAnnotations.Range(0D, 2147483647D)]
-        public double? Price { get; set; }
+        public double Price { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("authorId")]
         public int AuthorId { get; set; }
@@ -1712,8 +1716,8 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
         [System.Text.Json.Serialization.JsonPropertyName("summary")]
         public string Summary { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("image")]
-        public string Image { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("imageUrl")]
+        public string ImageUrl { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("price")]
         public double? Price { get; set; }
@@ -1758,9 +1762,11 @@ namespace BookStoreApp.Blazor.Server.UI.Services.Http
         [System.ComponentModel.DataAnnotations.StringLength(250)]
         public string Summary { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("image")]
-        [System.ComponentModel.DataAnnotations.StringLength(50)]
-        public string Image { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("imageBase64")]
+        public string ImageBase64 { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("imageOringinalName")]
+        public string ImageOringinalName { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("price")]
         public double? Price { get; set; }

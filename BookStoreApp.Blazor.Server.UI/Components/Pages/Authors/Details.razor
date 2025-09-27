@@ -1,4 +1,5 @@
 ﻿@page "/authors/details/{Id:int}"
+@rendermode InteractiveServer
 @inject IBaseHttpClient _baseHttpClient
 
 <h1>Details</h1>
@@ -13,7 +14,7 @@ else if (AuthorResponse.Success == false)
 	<article class="pico-color-red-500">@AuthorResponse.Message</article>
 }else
 {
-	<EditForm FormName="AuthorEdit" Model="AuthorResponse.Data">
+	<EditForm FormName="AuthorDetails" Model="AuthorResponse.Data">
 		<fieldset disabled>
 			<fieldset>
 				<label>
@@ -43,7 +44,7 @@ else if (AuthorResponse.Success == false)
 			Go back to list
 		</a>
 		<a href="authors/edit/@Id" class="contrast">
-			Edit Auhor
+			Edit Author
 		</a>
 	</div>
 
@@ -62,16 +63,31 @@ else if (AuthorResponse.Success == false)
 	}
 	else
 	{
-		<QuickGrid Items="AuthorBooksResponse.Data">
+		@* <QuickGrid Items="AuthorBooksResponse.Data">
 			<PropertyColumn Property="@(b => b.Id)" Sortable="true" />
 			<PropertyColumn Property="@(b => b.Year)" Sortable="true" />
 			<PropertyColumn Property="@(b => b.Title)" Sortable="true" />
 			<PropertyColumn Property="@(b => b.Price.HasValue ? b.Price.Value.ToString("C") : string.Empty)" Sortable="true" />
 			<PropertyColumn Property="@(b => b.Isbn)" Sortable="true" />
 			<TemplateColumn Context="book">
-				<a href="book/details/@book.Id">View Book</a>
+				<a href="books/details/@book.Id">View Book</a>
 			</TemplateColumn>
-		</QuickGrid>
+		</QuickGrid> *@
+
+		<div class="grid" style="display:grid; grid-template-columns: 1fr 1fr;">
+			@foreach(var book in AuthorBooksResponse.Data)
+			{
+				<article>
+					<header>@book.Title</header>
+					<img src="@book.ImageUrl" height="100" width="100"/>
+					<h5> Author: @book.AuthorName</h5>
+					<h5> Year: @book.Year</h5>
+					<h5> ISBN: @book.Isbn</h5>
+
+					<footer>@book.Price.Value.ToString("C")</footer>
+				</article>
+			}
+		</div>
 	}
 
 }

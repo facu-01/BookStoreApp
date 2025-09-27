@@ -30,4 +30,8 @@
     <ProjectReference Include="..\BookStoreApp.Commons\BookStoreApp.Commons.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\booksCoverImgs\" />
+  </ItemGroup>
+
 </Project>

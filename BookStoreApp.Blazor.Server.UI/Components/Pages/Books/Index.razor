@@ -1,0 +1,99 @@
+﻿@page "/books"
+@rendermode InteractiveServer
+@inject IBaseHttpClient _baseHttpClient
+
+
+<h1>Books</h1>
+
+<AuthorizeView Roles="@UserRoles.Admin">
+	<a href="books/create">Create</a>
+</AuthorizeView>
+<br />
+
+@if (response == null)
+{
+	<span aria-busy="true">Loading ...</span>
+}
+else
+{
+	@if (response.Success == false)
+	{
+		<article class="pico-color-red-500">@response.Message</article>
+	}
+	else
+	{
+		<QuickGrid Items="response.Data">
+			<TemplateColumn Context="book">
+				<img src="@book.ImageUrl" height="100" width="100" alt="@book.Title" />
+			</TemplateColumn>
+			<PropertyColumn Property="@(b => b.Id)" Sortable="true" />
+			<PropertyColumn Property="@(b => b.Title)" Sortable="true" />
+			<PropertyColumn Property="@(b => b.Price.HasValue ? b.Price.Value.ToString("C") : "")" Sortable="true" />
+			<TemplateColumn Sortable="true" Context="book">
+				<a href="authors/details/@book.AuthorId">@book.AuthorName</a>
+			</TemplateColumn>
+			<PropertyColumn Property="@(b => b.Isbn)" Sortable="true" />
+			<PropertyColumn Property="@(b => b.Year)" Sortable="true" />
+			<TemplateColumn Context="book">
+				<a href="books/details/@book.Id">Details</a>
+				<AuthorizeView Roles="@UserRoles.Admin">
+					| <a href="books/edit/@book.Id">Edit</a> |
+					<button class="outline" @onclick=@(() => SetDeleteDialog(book))>Delete</button>
+				</AuthorizeView>
+			</TemplateColumn>
+		</QuickGrid>
+	}
+}
+
+@if (book != null)
+{
+	<dialog open>
+		<article>
+			<h2>Confirm delete Book @book?.Title </h2>
+			<footer>
+				<button class="secondary" @onclick=@(() => SetDeleteDialog(null))>
+					Cancel
+				</button>
+				<button @onclick=@(() => DeleteBook(book.Id))>Confirm</button>
+			</footer>
+		</article>
+	</dialog>
+}
+
+
+@code {
+
+	private Response<IQueryable<BookReadOnlyDto>>? response = null;
+	private BookReadOnlyDto? book = null; // acts as a flag to show/hide the dialog
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		response = await _baseHttpClient.MakeRequest((
+			async cli => (await cli.BooksAllAsync()).AsQueryable()));
+	}
+
+
+	private void SetDeleteDialog(BookReadOnlyDto? book)
+	{
+		this.book = book;
+	}
+
+
+	private async Task DeleteBook(int id)
+	{
+		var deleteResponse = await _baseHttpClient.MakeRequest(cli => cli.BooksDELETEAsync(id));
+		if (deleteResponse.Success)
+		{
+			// Refresh the list after deletion
+			await OnInitializedAsync();
+		}
+		else
+		{
+			// TODO: Handle error (e.g., show a message to the user)
+		}
+
+		book = null;
+
+	}
+}

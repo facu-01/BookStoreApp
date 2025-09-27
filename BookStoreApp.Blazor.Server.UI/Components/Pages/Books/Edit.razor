@@ -1,0 +1,147 @@
+﻿@page "/books/edit/{Id:int}"
+@rendermode InteractiveServer
+@inject IBaseHttpClient _baseHttpClient
+@inject NavigationManager _navigationManager
+@attribute [Authorize(Roles = UserRoles.Admin)]
+
+
+<ResponseLoader Response="GetBookResponse" />
+
+@if (GetBookResponse?.Success == true)
+{
+	<EditForm FormName="BookEdit" Model="Model" OnValidSubmit="HandleEditBook">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+	<fieldset>
+		<label>
+			Title
+			<InputText @bind-Value="Model.Title" />
+			<ValidationMessage For="@(() => Model.Title)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			ISBN
+			<InputText @bind-Value="Model.Isbn" />
+			<ValidationMessage For="@(() => Model.Isbn)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Price
+			<InputNumber @bind-Value="Model.Price" />
+			<ValidationMessage For="@(() => Model.Price)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Year
+			<InputNumber @bind-Value="Model.Year" />
+			<ValidationMessage For="@(() => Model.Year)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Summary
+			<InputTextArea @bind-Value="Model.Summary" />
+			<ValidationMessage For="@(() => Model.Summary)" />
+		</label>
+	</fieldset>
+
+
+	<fieldset>
+		<label>
+			Cover
+			<InputFile OnChange="HandleFileSelection" />
+			@if (!string.IsNullOrEmpty(ImageBase64))
+			{
+				<img src="@ImageBase64" alt="Book Cover" style="max-width: 100px; max-height: 100px;" />
+			}else if (!string.IsNullOrEmpty(GetBookResponse.Data?.ImageUrl))
+			{
+				<img src="@GetBookResponse.Data.ImageUrl" alt="Book Cover" style="max-width: 100px; max-height: 100px;" />
+			}	
+			<ValidationMessage For="@(() => Model.ImageBase64)" />
+		</label>
+	</fieldset>
+
+		<button aria-busy="@(LoadingEdit ? "true" : "false")" disabled="@LoadingEdit" type="submit">Edit Book</button>
+
+		<a href="books" class="secondary">
+			Cancel
+		</a>
+	</EditForm>
+
+}
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+
+
+	private Response<BookReadOnlyDto>? GetBookResponse = null;
+	private Response? UpdateBookResponse = null;
+	private BookUpdateDto Model = new BookUpdateDto();
+	private string ImgError = string.Empty;
+	private string ImageBase64 = string.Empty;
+	private bool LoadingEdit = false;
+
+	private async Task HandleFileSelection(InputFileChangeEventArgs e)
+	{
+		var file = e.File;
+
+		if (file == null) return;
+
+		var fileType = file.ContentType;
+
+		if (!fileType.StartsWith("image/"))
+		{
+			ImgError = "Only image files are allowed.";
+		}
+		else
+		{
+			using var memoryStream = new MemoryStream();
+			await file.OpenReadStream().CopyToAsync(memoryStream);
+			var fileByteArray = memoryStream.ToArray();
+			var base64String = Convert.ToBase64String(fileByteArray);
+			ImageBase64 = $"data:{fileType};base64,{base64String}";
+			Model.ImageBase64 = base64String;
+			Model.ImageOringinalName = file.Name;
+		}
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		GetBookResponse = await _baseHttpClient.MakeRequest((
+			cli => cli.BooksGETAsync(Id)));
+
+		if (GetBookResponse.Success && GetBookResponse.Data != null)
+		{
+			Model = new BookUpdateDto
+			{
+				Id = GetBookResponse.Data.Id,
+				Title = GetBookResponse.Data.Title,
+				Isbn = GetBookResponse.Data.Isbn,
+				Price = GetBookResponse.Data.Price,
+				Summary = GetBookResponse.Data.Summary,
+				Year = GetBookResponse.Data.Year,
+				AuthorId = GetBookResponse.Data.AuthorId
+			};
+		}
+	}
+
+
+	private async Task HandleEditBook()
+	{
+		UpdateBookResponse = await _baseHttpClient.MakeRequest(cli => cli.BooksPUTAsync(Id, Model));
+
+		if (UpdateBookResponse.Success)
+		{
+			_navigationManager.NavigateTo("books");
+		}
+
+	}
+}

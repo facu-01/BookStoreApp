@@ -55,7 +55,14 @@ namespace BookStoreApp.API.Controllers
                 return NotFound();
             }
 
-            return author.Books.Select(b => b.MapToBookReadOnlyDto()).ToList();
+            var booksDto = author.Books.Select(b =>
+            {
+                var bookDto = b.MapToBookReadOnlyDto();
+                bookDto.ImageUrl = GetCoverBookImgUrl(b.Image);
+                return bookDto;
+            }).ToList();
+
+            return booksDto;
         }
 
         // PUT: api/Authors/5
@@ -132,6 +139,12 @@ namespace BookStoreApp.API.Controllers
         private bool AuthorExists(int id)
         {
             return _context.Authors.Any(e => e.Id == id);
+        }
+
+        private string? GetCoverBookImgUrl(string? imgFilename)
+        {
+            if (string.IsNullOrEmpty(imgFilename)) return null;
+            return $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}/booksCoverImgs/{imgFilename}";
         }
     }
 }

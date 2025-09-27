@@ -1,0 +1,98 @@
+﻿@page "/books/details/{Id:int}"
+@rendermode InteractiveServer
+@inject IBaseHttpClient _baseHttpClient
+
+
+<h3>Details</h3>
+
+<ResponseLoader Response="BookResponse"/>
+
+@if (BookResponse?.Success == true)
+{
+	<EditForm FormName="BookDetails" Model="BookResponse.Data">
+		<fieldset disabled>
+			<fieldset>
+				<label>
+					Title
+					<InputText @bind-Value="BookResponse.Data.Title" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					ISBN
+					<InputText @bind-Value="BookResponse.Data.Isbn" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Price
+					<InputNumber @bind-Value="BookResponse.Data.Price" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Year
+					<InputNumber @bind-Value="BookResponse.Data.Year" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Year
+					<InputTextArea @bind-Value="BookResponse.Data.Summary" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Summary
+					<InputTextArea @bind-Value="BookResponse.Data.Summary" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Author
+					<InputText @bind-Value="BookResponse.Data.AuthorName" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Cover
+					<img src="@BookResponse.Data.ImageUrl" alt="Book Cover" style="max-width: 100px; max-height: 100px;" />
+				</label>
+			</fieldset>
+			
+		</fieldset>
+
+			
+	</EditForm>
+
+	<div class="grid">
+		<a href="books" class="secondary">
+			Go back to list
+		</a>
+		<a href="books/edit/@Id" class="contrast">
+			Edit Book
+		</a>
+	</div>
+}
+
+
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+
+	private Response<BookReadOnlyDto>? BookResponse = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		BookResponse = await _baseHttpClient.MakeRequest((
+			cli => cli.BooksGETAsync(Id)));
+	}
+}

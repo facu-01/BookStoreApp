@@ -14,8 +14,8 @@ namespace BookStoreApp.API.Models.Book
 
         [StringLength(250)]
         public string? Summary { get; set; }
-        [StringLength(50)]
-        public string? Image { get; set; }
+        public string? ImageBase64 { get; set; }
+        public string? ImageOringinalName { get; set; }
         [Required]
         public decimal? Price { get; set; }
         [Required]

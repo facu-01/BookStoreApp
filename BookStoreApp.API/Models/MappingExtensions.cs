@@ -43,7 +43,6 @@ namespace BookStoreApp.API.Models
             return new BookReadOnlyDto
             {
                 Id = book.Id,
-                Image = book.Image,
                 Isbn = book.Isbn,
                 Price = book.Price,
                 Summary = book.Summary,
@@ -59,7 +58,6 @@ namespace BookStoreApp.API.Models
             return new Data.Book
             {
                 AuthorId = createBookDto.AuthorId,
-                Image = createBookDto.Image,
                 Isbn = createBookDto.Isbn,
                 Price = createBookDto.Price,
                 Summary = createBookDto.Summary,
@@ -73,7 +71,6 @@ namespace BookStoreApp.API.Models
             return new Data.Book
             {
                 AuthorId = updateBookDto.AuthorId,
-                Image = updateBookDto.Image,
                 Id = updateBookDto.Id,
                 Isbn = updateBookDto.Isbn,
                 Price = updateBookDto.Price,

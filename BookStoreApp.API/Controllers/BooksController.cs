@@ -14,10 +14,12 @@ namespace BookStoreApp.API.Controllers
     public class BooksController : ControllerBase
     {
         private readonly BookStoreDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public BooksController(BookStoreDbContext context)
+        public BooksController(BookStoreDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: api/Books
@@ -25,8 +27,17 @@ namespace BookStoreApp.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<BookReadOnlyDto>>> GetBooks()
         {
-            var books = await _context.Books.Include(q => q.Author).Select(b => b.MapToBookReadOnlyDto()).ToListAsync();
-            return books;
+            var books = await _context.Books.Include(q => q.Author)
+                .ToListAsync();
+
+            var booksDto = books.Select(b =>
+            {
+                var bookDto = b.MapToBookReadOnlyDto();
+                bookDto.ImageUrl = GetCoverBookImgUrl(b.Image);
+                return bookDto;
+            }).ToList();
+
+            return booksDto;
         }
 
         // GET: api/Books/5
@@ -34,21 +45,24 @@ namespace BookStoreApp.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<BookReadOnlyDto>> GetBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
+            var book = await _context.Books.Include(b => b.Author).FirstOrDefaultAsync(b => b.Id == id);
 
             if (book == null)
             {
                 return NotFound();
             }
 
-            return book.MapToBookReadOnlyDto();
+            var bookDto = book.MapToBookReadOnlyDto();
+            bookDto.ImageUrl = GetCoverBookImgUrl(book.Image);
+
+            return bookDto;
         }
 
         // PUT: api/Books/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = UserRoles.Admin)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PutBook(int id, BookUpdateDto bookUpdateDto)
@@ -60,7 +74,20 @@ namespace BookStoreApp.API.Controllers
 
             var book = bookUpdateDto.MapToBook();
 
-            _context.Entry(book).State = EntityState.Modified;
+            var entry = _context.Entry(book);
+            entry.State = EntityState.Modified;
+
+            if (bookUpdateDto.ImageBase64 != null && bookUpdateDto.ImageOringinalName != null)
+            {
+
+                DeleteCoverBookImg(book.Image);
+                book.Image = await SaveCoverBookImg(bookUpdateDto.ImageBase64, bookUpdateDto.ImageOringinalName);
+            }
+            else
+            {
+                entry.Property(b => b.Image).IsModified = false;
+            }
+
 
             try
             {
@@ -90,8 +117,14 @@ namespace BookStoreApp.API.Controllers
         public async Task<ActionResult<BookReadOnlyDto>> PostBook(BookCreateDto bookDto)
         {
             var book = bookDto.MapToBook();
+
+            book.Image = await SaveCoverBookImg(bookDto.ImageBase64, bookDto.ImageOringinalName);
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
+
+            var author = await _context.Authors.FindAsync(book.AuthorId);
+
+            book.Author = author;
 
             return CreatedAtAction("GetBook", new { id = book.Id }, book.MapToBookReadOnlyDto());
         }
@@ -109,10 +142,44 @@ namespace BookStoreApp.API.Controllers
                 return NotFound();
             }
 
+            DeleteCoverBookImg(book.Image);
+
             _context.Books.Remove(book);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+
+        private async Task<string> SaveCoverBookImg(string imgBase64, string imgFileName)
+        {
+
+            var fileExtension = Path.GetExtension(imgFileName);
+            var fileName = $"{Guid.NewGuid()}{fileExtension}";
+            var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "booksCoverImgs", fileName);
+            byte[] image = Convert.FromBase64String(imgBase64);
+            await System.IO.File.WriteAllBytesAsync(filePath, image);
+
+            return fileName;
+        }
+
+        private void DeleteCoverBookImg(string? imgFileName)
+        {
+            if (imgFileName == null) return;
+            var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "booksCoverImgs", imgFileName);
+
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+
+        }
+
+        private string? GetCoverBookImgUrl(string? imgFilename)
+        {
+            if (string.IsNullOrEmpty(imgFilename)) return null;
+            return $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}/booksCoverImgs/{imgFilename}";
         }
 
         private bool BookExists(int id)

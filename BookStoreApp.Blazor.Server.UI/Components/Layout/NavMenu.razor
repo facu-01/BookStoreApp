@@ -3,11 +3,11 @@
     <AuthorizeView>
         <NotAuthorized>
             <NavLink href="users/register">
-                <span aria-hidden="true"></span> Register
+                Register
             </NavLink>
 
             <NavLink href="users/login">
-                <span aria-hidden="true"></span> Login
+                Login
             </NavLink>
         </NotAuthorized>
         <Authorized>
@@ -15,10 +15,13 @@
                 Hello @context.User?.Identity?.Name
             </span>
             <NavLink href="users/logout">
-                <span aria-hidden="true"></span> Logout
+                Logout
             </NavLink>
             <NavLink href="authors">
-                <span aria-hidden="true"></span> Authors
+                Authors
+            </NavLink>
+            <NavLink href="books">
+                Books
             </NavLink>
         </Authorized>
     </AuthorizeView>
