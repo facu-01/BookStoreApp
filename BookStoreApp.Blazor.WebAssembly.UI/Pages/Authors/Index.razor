@@ -1,0 +1,92 @@
+﻿@page "/authors"
+@inject IBaseHttpClient _baseHttpClient
+
+
+
+
+<h1>Authors</h1>
+
+<AuthorizeView Roles="@UserRoles.Admin">
+	<a href="authors/create">Create</a>
+</AuthorizeView>
+<br />
+
+@if(response == null)
+{
+	<span aria-busy="true">Loading ...</span>
+}
+else
+{
+	@if (response.Success == false)
+	{
+		<article class="pico-color-red-500">@response.Message</article>
+	}
+	else
+	{
+		<QuickGrid Items="response.Data">
+			<PropertyColumn Property="@(a => a.Id)" Sortable="true" />
+			<PropertyColumn Property="@(a => a.FirstName)" Sortable="true" />
+			<PropertyColumn Property="@(a => a.LastName)" Sortable="true" />
+			<TemplateColumn Context="author">
+				<a href="authors/details/@author.Id">Details</a> 
+				<AuthorizeView Roles="@UserRoles.Admin">
+					| <a href="authors/edit/@author.Id">Edit</a> |
+					<button class="outline" @onclick=@(() => SetDeleteDialog(author))>Delete</button>
+				</AuthorizeView>
+			</TemplateColumn>
+		</QuickGrid>
+	}
+}
+
+@if(deleteAuthor != null)
+{
+	<dialog open>
+		<article>
+			<h2>Confirm delete Author @deleteAuthor?.FirstName @deleteAuthor?.LastName </h2>
+			<footer>
+				<button class="secondary" @onclick=@(() => SetDeleteDialog(null))>
+					Cancel
+				</button>
+				<button @onclick=@(() => DeleteAuthor(deleteAuthor.Id))>Confirm</button>
+			</footer>
+		</article>
+	</dialog>
+}
+
+
+@code {
+
+	private Response<IQueryable<AuthorReadOnlyDto>>? response = null;
+	private AuthorReadOnlyDto? deleteAuthor = null; // acts as a flag to show/hide the dialog
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		response = await _baseHttpClient.MakeRequest((
+			async cli => (await cli.AuthorsAllAsync()).AsQueryable()));
+	}
+
+
+	private void SetDeleteDialog(AuthorReadOnlyDto? author)
+	{
+		deleteAuthor = author;
+	}
+
+
+	private async Task DeleteAuthor(int id)
+	{
+		var deleteResponse = await _baseHttpClient.MakeRequest(cli => cli.AuthorsDELETEAsync(id));
+		if (deleteResponse.Success)
+		{
+			// Refresh the list of authors after deletion
+			await OnInitializedAsync();
+		}
+		else
+		{
+			// TODO: Handle error (e.g., show a message to the user)
+		}
+
+		deleteAuthor = null;
+
+	}
+}

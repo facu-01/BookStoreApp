@@ -1,0 +1,75 @@
+﻿@page "/users/login"
+@inject IAuthenticationService _authenticationService
+@inject NavigationManager _navManager
+
+<h3>Login</h3>
+
+@if (string.IsNullOrEmpty(message) == false)
+{
+	<article class="pico-color-red-500">@message</article>
+}
+
+<div>
+	<EditForm FormName="Login" Model="LoginModel" OnValidSubmit="HandleLogin">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+		<fieldset>
+			<label>
+				Username
+				<InputText @bind-Value="LoginModel.UserName" />
+				<ValidationMessage For="@(() => LoginModel.UserName)" />
+			</label>
+		</fieldset>
+
+		<fieldset>
+			<label>
+				Password
+				<InputText type="password" @bind-Value="LoginModel.Password" />
+				<ValidationMessage For="@(() => LoginModel.Password)" />
+			</label>
+		</fieldset>
+
+		<button aria-busy="@(loading ? "true" : "false")" disabled="@loading" type="submit">Login</button>
+	</EditForm>
+</div>
+
+@code {
+
+	private UserLoginDto LoginModel = new UserLoginDto();
+
+	private string message = string.Empty;
+
+	private bool loading = false;
+
+	private async Task HandleLogin()
+	{
+		loading = true;
+		try
+		{
+
+			var response = await _authenticationService.AuthenticateAsync(LoginModel);
+
+			if (response)
+			{
+				_navManager.NavigateTo("");
+			}
+
+		}
+		catch (ApiException ex)
+		{
+			message = ex.Message;
+
+		}
+		catch (Exception ex)
+		{
+			message = ex.Message;
+		}
+		finally
+		{
+			loading = false;
+		}
+
+	}
+
+}

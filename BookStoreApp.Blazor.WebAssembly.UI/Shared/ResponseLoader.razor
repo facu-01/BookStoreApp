@@ -1,0 +1,17 @@
+﻿
+
+@if (Response == null)
+{
+	<span aria-busy="true">Loading ...</span>
+}
+else if (Response.Success == false)
+{
+	<article class="pico-color-red-500">@Response.Message</article>
+}
+
+
+@code {
+	[Parameter]
+	public Response Response { get; set; }
+
+}

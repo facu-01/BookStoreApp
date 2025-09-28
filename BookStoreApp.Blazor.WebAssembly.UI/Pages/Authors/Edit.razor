@@ -1,0 +1,100 @@
+﻿@page "/authors/edit/{Id:int}"
+@inject IBaseHttpClient _baseHttpClient
+@inject NavigationManager _navigationManager
+@attribute [Authorize(Roles = UserRoles.Admin)]
+
+
+<h1>Edit Author</h1>
+
+@if (UpdateAuthorResponse?.Success == false)
+{
+	<article class="pico-color-red-500">@UpdateAuthorResponse.Message</article>
+}
+
+@if (GetAuthorResponse == null)
+{
+	<span aria-busy="true">Loading ...</span>
+}
+else
+{
+	@if (GetAuthorResponse.Success == false)
+	{
+		<article class="pico-color-red-500">@GetAuthorResponse.Message</article>
+	}else
+	{
+		<EditForm FormName="AuthorEdit" Model="Model" OnValidSubmit="HandleEditAuthor">
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+			<fieldset>
+				<label>
+					First name
+					<InputText @bind-Value="Model.FirstName" />
+					<ValidationMessage For="@(() => Model.FirstName)" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Last name
+					<InputText @bind-Value="Model.LastName" />
+					<ValidationMessage For="@(() => Model.LastName)" />
+				</label>
+			</fieldset>
+
+			<fieldset>
+				<label>
+					Biography
+					<InputText @bind-Value="Model.Bio" />
+					<ValidationMessage For="@(() => Model.Bio)" />
+				</label>
+			</fieldset>
+
+			<button aria-busy="@(LoadingEdit ? "true" : "false")" disabled="@LoadingEdit" type="submit">Edit Author</button>
+
+			<a href="authors" class="secondary">
+				Cancel
+			</a>
+
+		</EditForm>
+	}
+}
+
+@code {
+
+	[Parameter]
+	public int Id { get; set; }
+
+	private Response<AuthorReadOnlyDto>? GetAuthorResponse = null;
+	private AuthorUpdateDto Model = new AuthorUpdateDto();
+	private Response? UpdateAuthorResponse = null;
+
+	private bool LoadingEdit = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		GetAuthorResponse = await _baseHttpClient.MakeRequest(cli => cli.AuthorsGETAsync(Id));
+
+		if (GetAuthorResponse.Success && GetAuthorResponse.Data != null)
+		{
+			Model = new AuthorUpdateDto
+			{
+				Id = GetAuthorResponse.Data.Id,
+				Bio = GetAuthorResponse.Data.Bio,
+				FirstName = GetAuthorResponse.Data.FirstName,
+				LastName = GetAuthorResponse.Data.LastName
+			};
+		}
+	}
+
+	private async Task HandleEditAuthor()
+	{
+		UpdateAuthorResponse = await _baseHttpClient.MakeRequest(cli => cli.AuthorsPUTAsync(Id, Model));
+
+		if (UpdateAuthorResponse.Success)
+		{
+			_navigationManager.NavigateTo("authors");
+		}
+
+	}
+
+}

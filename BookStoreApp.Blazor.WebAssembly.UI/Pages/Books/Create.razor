@@ -1,0 +1,147 @@
+﻿@page "/books/create"
+@inject IBaseHttpClient _baseHttpClient
+@inject NavigationManager _navManager
+@attribute [Authorize(Roles = UserRoles.Admin)]
+
+
+<h1>Create Book</h1>
+
+@if (CreateBookResponse?.Success == false)
+{
+	<article class="pico-color-red-500">@CreateBookResponse.Message</article>
+}
+
+<EditForm FormName="BookCreate" Model="BookCreateModel" OnValidSubmit="HandleCreateBook">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+	<fieldset>
+		<label>
+			Title
+			<InputText @bind-Value="BookCreateModel.Title" />
+			<ValidationMessage For="@(() => BookCreateModel.Title)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			ISBN
+			<InputText @bind-Value="BookCreateModel.Isbn" />
+			<ValidationMessage For="@(() => BookCreateModel.Isbn)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Price
+			<InputNumber @bind-Value="BookCreateModel.Price" />
+			<ValidationMessage For="@(() => BookCreateModel.Price)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Year
+			<InputNumber @bind-Value="BookCreateModel.Year" />
+			<ValidationMessage For="@(() => BookCreateModel.Year)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Summary
+			<InputTextArea @bind-Value="BookCreateModel.Summary" />
+			<ValidationMessage For="@(() => BookCreateModel.Summary)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Author
+			<InputSelect @bind-Value="BookCreateModel.AuthorId">
+				<option value="">-- Select Author --</option>
+				@foreach (var author in Authors)
+				{
+					<option value="@author.Id">@author.FirstName @author.LastName</option>
+				}
+			</InputSelect>
+			<ValidationMessage For="@(() => BookCreateModel.Summary)" />
+		</label>
+	</fieldset>
+
+
+	<fieldset>
+		<label>
+			Cover
+			<InputFile OnChange="HandleFileSelection" />
+			@if (!string.IsNullOrEmpty(ImageBase64))
+			{
+				<img src="@ImageBase64" alt="Book Cover" style="max-width: 100px; max-height: 100px;" />
+			}
+			<ValidationMessage For="@(() => BookCreateModel.ImageBase64)" />
+		</label>
+	</fieldset>
+
+
+
+	<button aria-busy="@(Loading ? "true" : "false")" disabled="@Loading" type="submit">Create Book</button>
+
+	<a href="books" class="secondary">
+		Cancel
+	</a>
+
+</EditForm>
+
+
+
+@code {
+	private BookCreateDto BookCreateModel = new ();
+	private List<AuthorReadOnlyDto> Authors = new();
+
+	private Response? CreateBookResponse = null;
+	private bool Loading = false;
+	private string ImgError = string.Empty;
+	private string ImageBase64 = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authorsResponse = await _baseHttpClient.MakeRequest((client) => client.AuthorsAllAsync());
+		if (authorsResponse.Success && authorsResponse.Data != null)
+		{
+			Authors = authorsResponse.Data.ToList();
+		}
+	}
+
+	private async Task HandleFileSelection(InputFileChangeEventArgs e)
+	{
+		var file = e.File;
+
+		if (file == null) return;
+
+		var fileType = file.ContentType;
+
+		if (!fileType.StartsWith("image/"))
+		{
+			ImgError = "Only image files are allowed.";
+		}
+		else
+		{
+			using var memoryStream = new MemoryStream();
+			await file.OpenReadStream().CopyToAsync(memoryStream);
+			var fileByteArray = memoryStream.ToArray();
+			var base64String = Convert.ToBase64String(fileByteArray);
+			ImageBase64 = $"data:{fileType};base64,{base64String}";
+			BookCreateModel.ImageBase64 = base64String;
+			BookCreateModel.ImageOringinalName = file.Name;
+		}
+	}
+
+	private async Task HandleCreateBook()
+	{
+		CreateBookResponse = await _baseHttpClient.MakeRequest((cli) => cli.BooksPOSTAsync(BookCreateModel));
+		if (CreateBookResponse.Success)
+		{
+			_navManager.NavigateTo("books");
+		}
+	}
+
+}

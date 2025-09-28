@@ -1,0 +1,65 @@
+﻿@page "/authors/create"
+@inject IBaseHttpClient _baseHttpClient
+@inject NavigationManager _navManager
+@attribute [Authorize(Roles = UserRoles.Admin)]
+
+<h1>Create Author</h1>
+
+@if (Response?.Success == false)
+{
+	<article class="pico-color-red-500">@Response.Message</article>
+}
+
+<EditForm FormName="AuthorCreate" Model="AuthorCreateModel" OnValidSubmit="HandleCreateAuthor">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+	<fieldset>
+		<label>
+			First name
+			<InputText @bind-Value="AuthorCreateModel.FirstName" />
+			<ValidationMessage For="@(() => AuthorCreateModel.FirstName)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Last name
+			<InputText @bind-Value="AuthorCreateModel.LastName" />
+			<ValidationMessage For="@(() => AuthorCreateModel.LastName)" />
+		</label>
+	</fieldset>
+
+	<fieldset>
+		<label>
+			Biography
+			<InputText @bind-Value="AuthorCreateModel.Bio" />
+			<ValidationMessage For="@(() => AuthorCreateModel.Bio)" />
+		</label>
+	</fieldset>
+
+	<button aria-busy="@(Loading ? "true" : "false")" disabled="@Loading" type="submit">Create Author</button>
+
+	<a href="authors" class="secondary">
+		Cancel
+	</a>
+
+</EditForm>
+
+@code {
+	private AuthorCreateDto AuthorCreateModel = new AuthorCreateDto();
+	private Response<AuthorReadOnlyDto>? Response = null;
+
+	private bool Loading = false;
+
+	private async Task HandleCreateAuthor()
+	{
+		Loading = true;
+		Response = await _baseHttpClient.MakeRequest((client) => client.AuthorsPOSTAsync(AuthorCreateModel));
+		Loading = false;
+		if(Response.Success == true)
+		{
+			_navManager.NavigateTo("authors");	
+		}
+
+	}
+}

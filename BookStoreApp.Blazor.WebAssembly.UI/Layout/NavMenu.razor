@@ -1,0 +1,34 @@
+﻿
+<nav>
+  
+    <AuthorizeView>
+        <NotAuthorized>
+            <NavLink href="users/register">
+                Register
+            </NavLink>
+
+            <NavLink href="users/login">
+                Login
+            </NavLink>
+        </NotAuthorized>
+        <Authorized>
+            <span>
+                Hello @context.User?.Identity?.Name
+            </span>
+            <NavLink href="users/logout">
+                Logout
+            </NavLink>
+            <NavLink href="authors">
+                Authors
+            </NavLink>
+            <NavLink href="books">
+                Books
+            </NavLink>
+        </Authorized>
+    </AuthorizeView>
+
+    <NavLink href="" Match="NavLinkMatch.All">
+        <span aria-hidden="true"></span> Home
+    </NavLink>
+   
+</nav>
